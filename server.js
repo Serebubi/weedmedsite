@@ -3,7 +3,10 @@ const fs = require("fs");
 const path = require("path");
 
 const root = __dirname;
-const port = process.env.PORT || 3010;
+const ports = Array.from(new Set([
+  Number(process.env.PORT) || 3010,
+  3010
+]));
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -30,7 +33,7 @@ function resolveFile(urlPath) {
   return filePath;
 }
 
-const server = http.createServer((request, response) => {
+function handleRequest(request, response) {
   const filePath = resolveFile(request.url || "/");
 
   if (!filePath) {
@@ -53,8 +56,18 @@ const server = http.createServer((request, response) => {
     });
     response.end(content);
   });
-});
+}
 
-server.listen(port, "0.0.0.0", () => {
-  console.log(`Static site listening on port ${port}`);
-});
+for (const port of ports) {
+  const server = http.createServer(handleRequest);
+
+  server.on("error", (error) => {
+    if (error.code === "EADDRINUSE") return;
+    console.error(`Server failed on port ${port}:`, error);
+    process.exitCode = 1;
+  });
+
+  server.listen(port, "0.0.0.0", () => {
+    console.log(`Static site listening on port ${port}`);
+  });
+}
