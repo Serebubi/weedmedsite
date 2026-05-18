@@ -1,0 +1,12 @@
+{
+  "name": "weedmedsite",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static Maxyield Farm landing site served for Railway.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
